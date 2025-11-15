@@ -14,6 +14,20 @@ using System.Threading.RateLimiting;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure Kestrel to listen on any IP
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    // HTTP endpoint on port 5000 (or any port you prefer)
+    serverOptions.ListenAnyIP(5000);
+    
+    // HTTPS endpoint on port 5001
+    serverOptions.ListenAnyIP(5001, listenOptions =>
+    {
+        listenOptions.UseHttps();
+    });
+});
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -49,6 +63,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     b => b.MigrationsAssembly("Infrastructure")));
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+builder.Services.AddScoped<IComplaintRepository, ComplaintRepository>();
 builder.Services.AddScoped<IPermissionService, AuthorizationService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
@@ -62,6 +77,9 @@ builder.Services.AddScoped<RefreshTokenService>();
 builder.Services.AddScoped<LogoutService>();
 builder.Services.AddScoped<ForgotPasswordService>();
 builder.Services.AddScoped<ResetPasswordService>();
+builder.Services.AddScoped<CreateComplaintService>();
+builder.Services.AddScoped<GetComplaintsService>();
+builder.Services.AddScoped<UpdateComplaintStatusService>();
 builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IValidator<RegisterRequest>, RegisterRequestValidator>();
 builder.Services.AddScoped<IValidator<VerifyOtpRequest>, VerifyOtpRequestValidator>();

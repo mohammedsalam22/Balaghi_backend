@@ -16,6 +16,7 @@ namespace Infrastructure.Persistence
         public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
         public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
         public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
+        public DbSet<Complaint> Complaints => Set<Complaint>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<UserRole>()
@@ -25,6 +26,16 @@ namespace Infrastructure.Persistence
                 .HasKey(rp => new { rp.RoleId, rp.PermissionId });
             modelBuilder.Entity<OtpCode>()
             .HasKey(o => o.Id);
+
+            modelBuilder.Entity<Complaint>()
+                .HasIndex(c => c.ComplaintNumber)
+                .IsUnique();
+
+            modelBuilder.Entity<Complaint>()
+                .HasOne(c => c.User)
+                .WithMany(u => u.Complaints)
+                .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
