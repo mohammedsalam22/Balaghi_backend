@@ -4,7 +4,7 @@ using Domain.Interfaces;
 
 namespace Application.Services
 {
-    public class CreateComplaintService
+    public class CreateComplaintService : ICreateComplaintService
     {
         private readonly IComplaintRepository _complaintRepository;
         private readonly IUnitOfWork _unitOfWork;
@@ -17,7 +17,7 @@ namespace Application.Services
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<CreateComplaintResponse> ExecuteAsync(CreateComplaintRequest request, Guid userId, CancellationToken ct = default)
+        public virtual async Task<CreateComplaintResponse> ExecuteAsync(CreateComplaintRequest request, Guid userId, CancellationToken ct = default)
         {
             // Create the complaint entity
             var complaint = new Complaint(

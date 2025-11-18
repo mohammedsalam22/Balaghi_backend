@@ -10,7 +10,7 @@ namespace InternetApplications.Controllers
     [ApiController]
     [Route("api/complaints")]
     public class ComplaintsController(
-        CreateComplaintService createComplaintService,
+        ICreateComplaintService createComplaintService,
         GetComplaintsService getComplaintsService,
         UpdateComplaintStatusService updateComplaintStatusService) : ControllerBase
     {

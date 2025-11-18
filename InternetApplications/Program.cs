@@ -12,6 +12,8 @@ using System.Text;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
 using Microsoft.OpenApi.Models;
+using AOP.Extensions;
+using AOP.Performance;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -77,13 +79,27 @@ builder.Services.AddScoped<RefreshTokenService>();
 builder.Services.AddScoped<LogoutService>();
 builder.Services.AddScoped<ForgotPasswordService>();
 builder.Services.AddScoped<ResetPasswordService>();
-builder.Services.AddScoped<CreateComplaintService>();
+// CreateComplaintService is registered below with AOP interception
 builder.Services.AddScoped<GetComplaintsService>();
 builder.Services.AddScoped<UpdateComplaintStatusService>();
 builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IValidator<RegisterRequest>, RegisterRequestValidator>();
 builder.Services.AddScoped<IValidator<VerifyOtpRequest>, VerifyOtpRequestValidator>();
 builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
+
+// Configure AOP Performance Interceptor
+builder.Services.Configure<PerformanceInterceptorOptions>(
+    builder.Configuration.GetSection("PerformanceInterceptor"));
+
+// Register AOP infrastructure
+builder.Services.AddAopInterceptors();
+
+// Register AOP Performance Interceptor
+// Use interface-based proxying (recommended approach)
+builder.Services.AddProxiedScoped<ICreateComplaintService, CreateComplaintService>();
+
+// Add test service for easy AOP testing
+builder.Services.AddProxiedScoped<AOP.Examples.ITestService, AOP.Examples.TestService>();
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer(options =>
     {
