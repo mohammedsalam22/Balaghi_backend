@@ -2,7 +2,8 @@ using Castle.DynamicProxy;
 using Microsoft.Extensions.DependencyInjection;
 using AOP.Performance;
 
-namespace AOP.Extensions
+namespace 
+src.AOP.Extensions
 {
     public static class ServiceCollectionExtensions
     {
