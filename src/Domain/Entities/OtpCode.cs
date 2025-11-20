@@ -13,7 +13,7 @@ namespace Domain.Entities
         public virtual User User { get; private set; } = null!;
         public string Code { get; private set; } = null!;
         public DateTime ExpiresAt { get; private set; }
-        public bool IsUsed { get; private set; }
+        public bool IsUsed { get; set; }
         private OtpCode() { }
         public OtpCode(Guid userId, string code, int validMinutes = 5)
         {

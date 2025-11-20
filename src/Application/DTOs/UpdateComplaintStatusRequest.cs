@@ -1,7 +1,7 @@
-using Domain.Entities;
+// using Domain.Entities;
 
-namespace Application.DTOs
-{
-    public record UpdateComplaintStatusRequest(ComplaintStatus Status);
-}
+// namespace Application.DTOs
+// {
+//     public record UpdateComplaintStatusRequest(ComplaintStatus Status);
+// }
 

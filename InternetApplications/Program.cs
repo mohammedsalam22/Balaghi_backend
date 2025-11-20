@@ -2,7 +2,6 @@
 using Infrastructure.Persistence;
 using Application.Services;
 using Domain.Interfaces;
-using Infrastructure.Repositories;
 using Infrastructure.Services;
 using Application.Validators;
 using FluentValidation;
@@ -12,6 +11,7 @@ using System.Text;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
 using Microsoft.OpenApi.Models;
+using Infrastructure.DataAccess;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,15 +61,13 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"),
     b => b.MigrationsAssembly("Infrastructure")));
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IRoleRepository, RoleRepository>();
-builder.Services.AddScoped<IComplaintRepository, ComplaintRepository>();
+builder.Services.AddScoped<IUserDao, UserDao>();
+builder.Services.AddScoped<IRoleDao, RoleDao>();
+builder.Services.AddScoped<IRefreshTokenDao, RefreshTokenDao>();
+builder.Services.AddScoped<IPasswordResetDao, PasswordResetDao>();
 builder.Services.AddScoped<IPermissionService, AuthorizationService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
-builder.Services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
 builder.Services.AddScoped<RegisterUserService>();
 builder.Services.AddScoped<VerifyOtpService>();
 builder.Services.AddScoped<LoginService>();
@@ -77,8 +75,6 @@ builder.Services.AddScoped<RefreshTokenService>();
 builder.Services.AddScoped<LogoutService>();
 builder.Services.AddScoped<ForgotPasswordService>();
 builder.Services.AddScoped<ResetPasswordService>();
-builder.Services.AddScoped<GetComplaintsService>();
-builder.Services.AddScoped<UpdateComplaintStatusService>();
 builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IValidator<RegisterRequest>, RegisterRequestValidator>();
 builder.Services.AddScoped<IValidator<VerifyOtpRequest>, VerifyOtpRequestValidator>();

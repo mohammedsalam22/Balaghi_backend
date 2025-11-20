@@ -6,10 +6,9 @@ namespace Domain.Entities
         public string FullName { get; private set; } = null!;
         public string Email { get; private set; } = null!;
         public string PasswordHash { get;  set; }
-        public bool IsEmailVerified { get; private set; }
+        public bool IsEmailVerified { get;  set; }
         public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
         public virtual ICollection<OtpCode> OtpCodes { get; init; } = new List<OtpCode>();
-        public ICollection<Complaint> Complaints { get; set; } = new List<Complaint>();
         private User() { }
         public User(string fullName, string email, string passwordHash)
         {

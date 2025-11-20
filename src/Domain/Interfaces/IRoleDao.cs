@@ -1,13 +1,9 @@
-﻿using Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using Domain.Entities;
 using System.Threading.Tasks;
 
 namespace Domain.Interfaces
 {
-    public interface IRoleRepository
+    public interface IRoleDao
     {
         Task<Role?> GetByNameAsync(string name, CancellationToken ct = default);
     }

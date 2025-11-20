@@ -1,32 +1,25 @@
 ﻿using Domain.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Services
 {
     public class LogoutService
     {
-        private readonly IRefreshTokenRepository _refreshTokenRepo;
+        private readonly IRefreshTokenDao _refreshTokenDao;
 
-        public LogoutService(IRefreshTokenRepository refreshTokenRepo)
+        public LogoutService(IRefreshTokenDao refreshTokenDao)
         {
-            _refreshTokenRepo = refreshTokenRepo;
+            _refreshTokenDao = refreshTokenDao;
         }
 
         public async Task ExecuteAsync(string refreshToken, CancellationToken ct = default)
         {
-            if (string.IsNullOrWhiteSpace(refreshToken))
-                return;
+            if (string.IsNullOrWhiteSpace(refreshToken)) return;
 
-            var token = await _refreshTokenRepo.GetByTokenAsync(refreshToken, ct);
-
+            var token = await _refreshTokenDao.GetByTokenAsync(refreshToken, ct);
             if (token != null && !token.IsRevoked && !token.IsExpired())
             {
-                _refreshTokenRepo.Revoke(token);
-                await _refreshTokenRepo.SaveChangesAsync(ct);
+                _refreshTokenDao.Revoke(token);
+                await _refreshTokenDao.SaveChangesAsync(ct);
             }
         }
     }

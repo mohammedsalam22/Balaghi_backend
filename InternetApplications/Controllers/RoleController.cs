@@ -4,9 +4,9 @@ using Domain.Interfaces;
 [Route("api/[controller]")]
 public class RoleController : ControllerBase
 {
-    private readonly IRoleRepository _roleRepository;
-    public RoleController(IRoleRepository roleRepository)
+    private readonly IRoleDao  _roleDao;
+    public RoleController(IRoleDao roleDao)
     {
-        _roleRepository = roleRepository;
+        _roleDao = roleDao;
     }
 }

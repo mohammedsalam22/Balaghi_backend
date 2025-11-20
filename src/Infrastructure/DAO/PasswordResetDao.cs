@@ -1,27 +1,27 @@
-﻿using Domain.Entities;
+using Domain.Entities;
 using Domain.Interfaces;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Infrastructure.Repositories
+namespace Infrastructure.DataAccess
 {
-    public class PasswordResetRepository(AppDbContext context) : IPasswordResetRepository
+    public class PasswordResetDao : IPasswordResetDao
     {
-        private readonly AppDbContext _context = context
-            ?? throw new ArgumentNullException(nameof(context));
+        private readonly AppDbContext _context;
 
-        public async Task AddAsync(PasswordResetToken token, CancellationToken ct)
+        public PasswordResetDao(AppDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task AddAsync(PasswordResetToken token, CancellationToken ct = default)
             => await _context.Set<PasswordResetToken>().AddAsync(token, ct);
 
-        public async Task<PasswordResetToken?> GetByTokenHashAsync(string tokenHash, CancellationToken ct)
+        public async Task<PasswordResetToken?> GetByTokenHashAsync(string tokenHash, CancellationToken ct = default)
             => await _context.Set<PasswordResetToken>()
                 .FirstOrDefaultAsync(t => t.TokenHash == tokenHash, ct);
-        public async Task<PasswordResetToken?> GetByTokenAsync(string token, CancellationToken ct)
+
+        public async Task<PasswordResetToken?> GetByTokenAsync(string token, CancellationToken ct = default)
         {
             var tokens = await _context.Set<PasswordResetToken>().ToListAsync(ct);
             return tokens.FirstOrDefault(t => BCrypt.Net.BCrypt.Verify(token, t.TokenHash));

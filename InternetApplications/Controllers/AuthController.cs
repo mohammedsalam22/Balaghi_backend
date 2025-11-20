@@ -63,32 +63,37 @@ namespace InternetApplications.Controllers
             }
         }
         [HttpPost("login")]
-        [EnableRateLimiting("LoginPolicy")]
-        public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken ct = default)
+[EnableRateLimiting("LoginPolicy")]
+public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken ct = default)
+{
+    try
+    {
+        var response = await loginService.ExecuteAsync(request, ct);
+           Response.Cookies.Append("refreshToken", response.RefreshToken, new CookieOptions
         {
-            try
-            {
-                var response = await loginService.ExecuteAsync(request, ct);
-
-                Response.Cookies.Append("refreshToken", response.RefreshToken, new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Strict,
-                    Expires = DateTimeOffset.UtcNow.AddDays(7)
-                });
-
-                return Ok(new { accessToken = response.AccessToken });
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "An internal error occurred  please try again later" });
-            }
-        }
+            HttpOnly = true,                   
+            Secure = true,                    
+            SameSite = SameSiteMode.Strict,
+            Expires = DateTimeOffset.UtcNow.AddDays(7),
+            Path = "/",                         
+        });
+        return Ok(new
+        {
+            accessToken = response.AccessToken,        
+            tokenType = "Bearer"                        
+        });
+    }
+    catch (UnauthorizedAccessException ex)
+    {
+        return Unauthorized(new { message = ex.Message });
+    }
+    catch (Exception)
+    {
+        return StatusCode(500, new { 
+            message = "try again later" 
+        });
+    }
+}
         [Authorize]
         [HttpPost("logout")]
         public async Task<IActionResult> Logout(CancellationToken ct = default)
@@ -127,58 +132,62 @@ namespace InternetApplications.Controllers
             }
         }
 
-        [HttpPost("refresh-token")]
-        public async Task<IActionResult> RefreshToken(CancellationToken ct = default)
+      [HttpPost("refresh-token")]
+public async Task<IActionResult> RefreshToken(CancellationToken ct = default)
+{
+    try
+    {
+
+        if (!Request.Cookies.TryGetValue("refreshToken", out var oldToken) || 
+            string.IsNullOrWhiteSpace(oldToken))
         {
-            try
-            {
-                var oldToken = Request.Cookies["refreshToken"]
-                    ?? throw new UnauthorizedAccessException("Refresh Token required");
-
-                var response = await refreshTokenService.ExecuteAsync(oldToken, ct);
-
-                Response.Cookies.Append("refreshToken", response.RefreshToken, new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Strict,
-                    Expires = DateTimeOffset.UtcNow.AddDays(7)
-                });
-
-                return Ok(new
-                {
-                    accessToken = response.AccessToken,
-                    expiresAt = response.AccessTokenExpiresAt
-                });
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                Response.Cookies.Delete("refreshToken", new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Strict
-                });
-
-                return Unauthorized(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                Response.Cookies.Delete("refreshToken", new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Strict
-                });
-
-                return StatusCode(500, new
-                {
-                    message = "Session renewal failed please log in again",
-                    detail = ex.Message
-                });
-            }
+            throw new UnauthorizedAccessException("Refresh Token required");
         }
 
+      
+        var response = await refreshTokenService.ExecuteAsync(oldToken, ct);
+        Response.Cookies.Append("refreshToken", response.RefreshToken, new CookieOptions
+        {
+            HttpOnly = true,      
+            Secure = true,        
+            SameSite = SameSiteMode.Strict,
+            Expires = DateTimeOffset.UtcNow.AddDays(7),
+            Path = "/",          
+        
+        });
+        return Ok(new
+        {
+            accessToken = response.AccessToken,
+        });
+    }
+    catch (UnauthorizedAccessException ex)
+    {
+        
+        Response.Cookies.Delete("refreshToken", new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Strict,
+            Path = "/"
+        });
+
+        return Unauthorized(new { message = ex.Message });
+    }
+    catch (Exception)
+    {
+        Response.Cookies.Delete("refreshToken", new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Strict,
+            Path = "/"
+        });
+
+        return StatusCode(500, new { 
+            message = "try again later" 
+        });
+    }
+}
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword(
             [FromBody] ForgotPasswordRequest request,

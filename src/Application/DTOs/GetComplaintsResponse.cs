@@ -1,5 +1,5 @@
-namespace Application.DTOs
-{
-    public record GetComplaintsResponse(List<ComplaintDto> Complaints);
-}
+// namespace Application.DTOs
+// {
+//     public record GetComplaintsResponse(List<ComplaintDto> Complaints);
+// }
 
