@@ -16,15 +16,11 @@ using Infrastructure.Data;
 using Application.UseCases.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Configure Kestrel to listen on any IP
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
-    serverOptions.ListenAnyIP(5000); // HTTP
-    serverOptions.ListenAnyIP(5001, listenOptions => listenOptions.UseHttps()); // HTTPS
+    serverOptions.ListenAnyIP(5000);
+    serverOptions.ListenAnyIP(5001, listenOptions => listenOptions.UseHttps());
 });
-
-// Add services to the container
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -54,25 +50,15 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
-
-// Configure DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"),
         b => b.MigrationsAssembly("Infrastructure")));
-
-// ========================
-// Register DAOs
-// ========================
 builder.Services.AddScoped<IUserDao, UserDao>();
 builder.Services.AddScoped<IRoleDao, RoleDao>();
 builder.Services.AddScoped<IRefreshTokenDao, RefreshTokenDao>();
 builder.Services.AddScoped<IPasswordResetDao, PasswordResetDao>();
 builder.Services.AddScoped<IGovernmentAgencyDao, GovernmentAgencyDao>();
-
-// ========================
-// Register Services
-// ========================
-builder.Services.AddScoped<LoginService>(); // يجب تسجيله قبل RefreshTokenService
+builder.Services.AddScoped<LoginService>();
 builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 builder.Services.AddScoped<RegisterUserService>();
 builder.Services.AddScoped<VerifyOtpService>();
@@ -82,22 +68,10 @@ builder.Services.AddScoped<ForgotPasswordService>();
 builder.Services.AddScoped<ResetPasswordService>();
 builder.Services.AddScoped<IPermissionService, AuthorizationService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddScoped<IPasswordHasher, PasswordHasher>(); // Singleton or Scoped حسب حاجتك
-
-// ========================
-// Validators
-// ========================
+builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IValidator<RegisterRequest>, RegisterRequestValidator>();
 builder.Services.AddScoped<IValidator<VerifyOtpRequest>, VerifyOtpRequestValidator>();
-
-// ========================
-// Configure SMTP settings
-// ========================
 builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
-
-// ========================
-// Configure Authentication
-// ========================
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer(options =>
     {
@@ -115,10 +89,6 @@ builder.Services.AddAuthentication("Bearer")
     });
 
 builder.Services.AddAuthorization();
-
-// ========================
-// Configure Rate Limiting
-// ========================
 builder.Services.AddRateLimiter(options =>
 {
     options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
@@ -148,35 +118,22 @@ builder.Services.AddRateLimiter(options =>
             "Too many requests try again later", cancellationToken));
     };
 });
-
-// ========================
-// Build App
-// ========================
 var app = builder.Build();
 
 app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
-
-// ========================
-// Seed Database
-// ========================
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     var hasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
     await DbInitializer.SeedAsync(context, hasher);
 }
-
-// ========================
-// Configure Middleware
-// ========================
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
 app.UseHttpsRedirection();
 app.MapControllers();
 

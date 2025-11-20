@@ -1,10 +1,11 @@
 ﻿
 using Application.DTOs;
+using Application.UseCases.Auth;
 using Domain.Entities;
 using Domain.Interfaces;
 namespace Infrastructure.Services
 {
-    public sealed class RefreshTokenService
+    public sealed class RefreshTokenService :IRefreshTokenService
     {
         private readonly IRefreshTokenDao _refreshTokenDao;
         private readonly IUserDao _userDao;

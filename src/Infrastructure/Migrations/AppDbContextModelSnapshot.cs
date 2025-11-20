@@ -22,7 +22,7 @@ namespace Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Domain.Entities.GovernmentEntity", b =>
+            modelBuilder.Entity("Domain.Entities.GovernmentAgency", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -37,7 +37,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("GovernmentEntity");
+                    b.ToTable("GovernmentAgencies");
                 });
 
             modelBuilder.Entity("Domain.Entities.OtpCode", b =>
@@ -156,16 +156,11 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid?>("GovernmentEntityId")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("GovernmentEntityId");
 
                     b.ToTable("Roles");
                 });
@@ -194,9 +189,6 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid?>("DepartmentId")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("text");
@@ -205,7 +197,7 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid?>("GovernmentEntityId")
+                    b.Property<Guid?>("GovernmentAgencyId")
                         .HasColumnType("uuid");
 
                     b.Property<bool>("IsEmailVerified")
@@ -217,7 +209,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GovernmentEntityId");
+                    b.HasIndex("GovernmentAgencyId");
 
                     b.ToTable("Users");
                 });
@@ -254,15 +246,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Role", b =>
-                {
-                    b.HasOne("Domain.Entities.GovernmentEntity", "GovernmentEntity")
-                        .WithMany("DefaultRoles")
-                        .HasForeignKey("GovernmentEntityId");
-
-                    b.Navigation("GovernmentEntity");
-                });
-
             modelBuilder.Entity("Domain.Entities.RolePermission", b =>
                 {
                     b.HasOne("Domain.Entities.Permission", "Permission")
@@ -284,11 +267,12 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.User", b =>
                 {
-                    b.HasOne("Domain.Entities.GovernmentEntity", "GovernmentEntity")
+                    b.HasOne("Domain.Entities.GovernmentAgency", "GovernmentAgency")
                         .WithMany("Employees")
-                        .HasForeignKey("GovernmentEntityId");
+                        .HasForeignKey("GovernmentAgencyId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
-                    b.Navigation("GovernmentEntity");
+                    b.Navigation("GovernmentAgency");
                 });
 
             modelBuilder.Entity("Domain.Entities.UserRole", b =>
@@ -310,10 +294,8 @@ namespace Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Domain.Entities.GovernmentEntity", b =>
+            modelBuilder.Entity("Domain.Entities.GovernmentAgency", b =>
                 {
-                    b.Navigation("DefaultRoles");
-
                     b.Navigation("Employees");
                 });
 
