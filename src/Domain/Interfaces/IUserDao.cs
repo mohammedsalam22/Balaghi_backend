@@ -19,5 +19,10 @@ namespace Domain.Interfaces
         Task SaveChangesAsync(CancellationToken ct = default);
         void UpdateUser(User user);
         void UpdateOtp(OtpCode otp);
+        Task<User?> GetByEmailAsync(string email, CancellationToken ct = default);
+        Task<PasswordSetupOtp?> GetValidSetupOtpAsync(string code, CancellationToken ct = default);
+        Task AddPasswordSetupOtpAsync(PasswordSetupOtp otp, CancellationToken ct = default);
+
+        
     }
 }

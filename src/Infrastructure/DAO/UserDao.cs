@@ -13,6 +13,18 @@ namespace Infrastructure.DataAccess
         {
             _context = context;
         }
+        public async Task<PasswordSetupOtp?> GetValidSetupOtpAsync(string code, CancellationToken ct = default)
+        {
+            return await _context.PasswordSetupOtps
+    .Where(p => p.Code == code && !p.IsUsed && p.ExpiresAt >= DateTime.UtcNow)
+    .Include(p => p.User)
+    .FirstOrDefaultAsync(ct);
+
+        }
+public async Task AddPasswordSetupOtpAsync(PasswordSetupOtp otp, CancellationToken ct = default)
+{
+    await _context.PasswordSetupOtps.AddAsync(otp, ct);
+}
 
         public async Task SaveChangesAsync(CancellationToken ct = default)
             => await _context.SaveChangesAsync(ct);
@@ -55,5 +67,11 @@ namespace Infrastructure.DataAccess
         }
         public void UpdateOtp(OtpCode otp) => _context.OtpCodes.Update(otp);
 public void UpdateUser(User user) => _context.Users.Update(user);
+public async Task<User?> GetByEmailAsync(string email, CancellationToken ct = default)
+{
+    return await _context.Users
+        .FirstOrDefaultAsync(u => u.Email == email, ct);
+}
     }
+
 }

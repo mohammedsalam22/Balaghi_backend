@@ -18,6 +18,7 @@ namespace Infrastructure.Persistence
         public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
         public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
         public DbSet<GovernmentAgency> GovernmentAgencies => Set<GovernmentAgency>();
+        public DbSet<PasswordSetupOtp> PasswordSetupOtps => Set<PasswordSetupOtp>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<UserRole>()
@@ -28,10 +29,16 @@ namespace Infrastructure.Persistence
             modelBuilder.Entity<OtpCode>()
             .HasKey(o => o.Id);
             modelBuilder.Entity<User>()
-        .HasOne(u => u.GovernmentAgency)      
-        .WithMany(a => a.Employees)
-        .HasForeignKey(u => u.GovernmentAgencyId)
-        .OnDelete(DeleteBehavior.SetNull);
+    .HasOne(u => u.GovernmentAgency)
+    .WithMany(a => a.Employees)
+    .HasForeignKey(u => u.GovernmentAgencyId)
+    .OnDelete(DeleteBehavior.SetNull);
+    modelBuilder.Entity<PasswordSetupOtp>()
+    .HasOne(p => p.User)
+    .WithMany(u => u.PasswordSetupOtps)
+    .HasForeignKey(p => p.UserId)
+    .OnDelete(DeleteBehavior.Cascade);
+        
         }
     }
 }

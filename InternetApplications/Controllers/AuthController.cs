@@ -213,6 +213,8 @@ public async Task<IActionResult> RefreshToken(CancellationToken ct = default)
             }
         }
 
+
+public record CompleteSetupRequest(string Code, string NewPassword);
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword(
             [FromBody] ResetPasswordRequest request,

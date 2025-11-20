@@ -71,6 +71,8 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IValidator<RegisterRequest>, RegisterRequestValidator>();
 builder.Services.AddScoped<IValidator<VerifyOtpRequest>, VerifyOtpRequestValidator>();
+builder.Services.AddScoped<InviteEmployeeService>();
+builder.Services.AddScoped<CompleteEmployeeSetupService>();
 builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer(options =>
@@ -127,6 +129,7 @@ using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     var hasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
+      await context.Database.MigrateAsync();
     await DbInitializer.SeedAsync(context, hasher);
 }
 if (app.Environment.IsDevelopment())
