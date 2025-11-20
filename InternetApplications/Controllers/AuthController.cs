@@ -6,6 +6,8 @@ using Domain.Exceptions;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.Authorization;
+using Domain.Entities;
+using Application.UseCases.Auth;
 namespace InternetApplications.Controllers
 {
     [ApiController]
@@ -14,13 +16,15 @@ namespace InternetApplications.Controllers
     RegisterUserService registerService,
     VerifyOtpService verifyOtpService,
     LoginService loginService,
-    RefreshTokenService refreshTokenService,
+    IRefreshTokenService _refreshTokenService,
     LogoutService logoutService,
     ForgotPasswordService forgotPasswordService,
     ResetPasswordService resetPasswordService,
     IValidator<RegisterRequest> registerValidator,
-    IValidator<VerifyOtpRequest> verifyValidator) : ControllerBase
+    IValidator<VerifyOtpRequest> verifyValidator
+    ) : ControllerBase
     {
+        private readonly IRefreshTokenService _refreshTokenService;
         [HttpPost("register")]
         public async Task<IActionResult> Register(
          [FromBody] RegisterRequest request,
@@ -139,7 +143,7 @@ public async Task<IActionResult> RefreshToken(CancellationToken ct = default)
         {
             throw new UnauthorizedAccessException("Refresh Token required");
         }
-        var response = await refreshTokenService.ExecuteAsync(oldToken, ct);
+       var response = await _refreshTokenService.ExecuteAsync(oldToken, ct);
         Response.Cookies.Append("refreshToken", response.RefreshToken, new CookieOptions
         {
             HttpOnly = true,      
