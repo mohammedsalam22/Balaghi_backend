@@ -77,11 +77,7 @@ public async Task<IActionResult> Login([FromBody] LoginRequest request, Cancella
             Expires = DateTimeOffset.UtcNow.AddDays(7),
             Path = "/",                         
         });
-        return Ok(new
-        {
-            accessToken = response.AccessToken,        
-            tokenType = "Bearer"                        
-        });
+        return Ok(response);
     }
     catch (UnauthorizedAccessException ex)
     {
@@ -143,8 +139,6 @@ public async Task<IActionResult> RefreshToken(CancellationToken ct = default)
         {
             throw new UnauthorizedAccessException("Refresh Token required");
         }
-
-      
         var response = await refreshTokenService.ExecuteAsync(oldToken, ct);
         Response.Cookies.Append("refreshToken", response.RefreshToken, new CookieOptions
         {
@@ -155,10 +149,8 @@ public async Task<IActionResult> RefreshToken(CancellationToken ct = default)
             Path = "/",          
         
         });
-        return Ok(new
-        {
-            accessToken = response.AccessToken,
-        });
+        return Ok(response);
+
     }
     catch (UnauthorizedAccessException ex)
     {

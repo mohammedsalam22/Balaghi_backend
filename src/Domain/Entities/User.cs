@@ -9,6 +9,14 @@ namespace Domain.Entities
         public bool IsEmailVerified { get;  set; }
         public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
         public virtual ICollection<OtpCode> OtpCodes { get; init; } = new List<OtpCode>();
+        public Guid? DepartmentId { get; set; }
+        public Guid? GovernmentEntityId { get; private set; }
+        public GovernmentEntity? GovernmentEntity { get; private set; }
+        public void AssignToGovernmentEntity(Guid governmentEntityId)
+        {
+            GovernmentEntityId = governmentEntityId;
+            
+}
         private User() { }
         public User(string fullName, string email, string passwordHash)
         {

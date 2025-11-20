@@ -45,7 +45,7 @@ namespace Application.Services
             await _userDao.AddOtpAsync(otp, ct);
             await _userDao.SaveChangesAsync(ct);
             await _emailService.SendOtpAsync(request.Email, request.FullName, otpCode, ct);
-            return new RegisterResponse("Registration was successful. A verification code has been sent to your email.");
+            return new RegisterResponse("Registration was successful A verification code has been sent to your email");
         }
     }
 }

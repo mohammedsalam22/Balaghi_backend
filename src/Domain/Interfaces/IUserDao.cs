@@ -19,6 +19,5 @@ namespace Domain.Interfaces
         Task SaveChangesAsync(CancellationToken ct = default);
         void UpdateUser(User user);
         void UpdateOtp(OtpCode otp);
-        
     }
 }

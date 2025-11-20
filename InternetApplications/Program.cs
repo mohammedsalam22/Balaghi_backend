@@ -131,7 +131,7 @@ app.UseAuthorization();
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    await DbInitializer.SeedAsync(context);
+    await DbInitializer.SeedAsync(context, scope.ServiceProvider.GetRequiredService<IPasswordHasher>());
 }
 if (app.Environment.IsDevelopment())
 {

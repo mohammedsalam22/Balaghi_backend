@@ -36,16 +36,23 @@ namespace Infrastructure.Services
 
             if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
                 throw new UnauthorizedAccessException("Incorrect email or password");
-
+                var accessTokenExpiresAt = DateTime.UtcNow.AddHours(1);
             var accessToken = GenerateAccessToken(user);
             var refreshToken = Guid.NewGuid().ToString("N");
             var refreshEntity = new RefreshToken(user.Id, refreshToken, 7);
             await _refreshTokenDao.AddAsync(refreshEntity, ct);
             await _refreshTokenDao.SaveChangesAsync(ct); 
+            
+            var roles = user.UserRoles.Select(r => r.Role.Name).ToList();
 
-            return new LoginResponse(accessToken, refreshToken, DateTime.UtcNow.AddHours(1));
+            return new LoginResponse(
+                accessToken,
+                roles,
+                refreshToken,
+                accessTokenExpiresAt
+            );
+
         }
-
         public string GenerateAccessToken(User user)
         {
             var claims = new List<Claim>

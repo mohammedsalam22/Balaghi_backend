@@ -1,9 +1,7 @@
-﻿// مكان الملف: Infrastructure/Services/RefreshTokenService.cs
-
+﻿
 using Application.DTOs;
 using Domain.Entities;
 using Domain.Interfaces;
-
 namespace Infrastructure.Services
 {
     public sealed class RefreshTokenService
@@ -21,7 +19,6 @@ namespace Infrastructure.Services
             _userDao = userDao;
             _loginService = loginService;
         }
-
         public async Task<LoginResponse> ExecuteAsync(string oldRefreshToken, CancellationToken ct = default)
         {
             var token = await _refreshTokenDao.GetByTokenAsync(oldRefreshToken, ct)
@@ -36,9 +33,18 @@ namespace Infrastructure.Services
             var newRefreshToken = Guid.NewGuid().ToString("N");
             var newRefreshEntity = new RefreshToken(user.Id, newRefreshToken, 7);
             await _refreshTokenDao.AddAsync(newRefreshEntity, ct);
+              var accessTokenExpiresAt = DateTime.UtcNow.AddHours(1);
             var accessToken = _loginService.GenerateAccessToken(user);
             await _refreshTokenDao.SaveChangesAsync(ct);
-            return new LoginResponse(accessToken, newRefreshToken, DateTime.UtcNow.AddHours(1));
+              var roles = user.UserRoles.Select(r => r.Role.Name).ToList();
+
+            return new LoginResponse(
+                accessToken,
+                roles,
+                newRefreshToken,
+                accessTokenExpiresAt
+            );
+         
         }
     }
 }
