@@ -45,6 +45,13 @@ public async Task AddPasswordSetupOtpAsync(PasswordSetupOtp otp, CancellationTok
                         .ThenInclude(r => r.RolePermissions)
                             .ThenInclude(rp => rp.Permission)
                 .FirstOrDefaultAsync(u => u.Id == userId, ct);
+                 public async Task<User?> GetByIdAsync(Guid userId, CancellationToken ct = default)
+                   {
+                      return await _context.Users
+            .Include(u => u.UserRoles)
+            .Include(u => u.PasswordSetupOtps)
+            .FirstOrDefaultAsync(u => u.Id == userId, ct);
+                }
 
         public async Task<User?> GetByEmailWithRolesAsync(string email, CancellationToken ct = default)
             => await _context.Users
@@ -72,6 +79,10 @@ public async Task<User?> GetByEmailAsync(string email, CancellationToken ct = de
     return await _context.Users
         .FirstOrDefaultAsync(u => u.Email == email, ct);
 }
+        public void Remove(User user)
+        {
+            _context.Users.Remove(user);
+        }
     }
 
 }

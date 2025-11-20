@@ -11,12 +11,16 @@ public class AdminManagementController : ControllerBase
 {
     private readonly InviteEmployeeService _inviteService;
     private readonly CompleteEmployeeSetupService _completeSetupService;
+    private readonly DeleteEmployeeService _deleteEmployeeService;
     public AdminManagementController(
         InviteEmployeeService inviteService,
-        CompleteEmployeeSetupService completeSetupService)
+        CompleteEmployeeSetupService completeSetupService,
+        DeleteEmployeeService deleteEmployeeService
+        )
     {
         _inviteService = inviteService;
         _completeSetupService = completeSetupService;
+        _deleteEmployeeService=deleteEmployeeService;
     }
     [HttpPost("invite-employee")]
     public async Task<IActionResult> InviteEmployee([FromBody] InviteEmployeeRequest request)
@@ -85,6 +89,37 @@ public class AdminManagementController : ControllerBase
         catch (Exception)
         {
             return StatusCode(500, new { success = false, message = "try again later" });
+        }
+    }
+    [HttpDelete("employee/{userId}")]
+    public async Task<IActionResult> DeleteEmployee([FromRoute] Guid userId)
+    {
+        try
+        {
+            await _deleteEmployeeService.DeleteEmployeeAsync(userId);
+            return Ok(new
+            {
+                success = true,
+                message = "Employee deleted successfully"
+            });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { success = false, message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { success = false, message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new
+            {
+                success = false,
+                message = "Try again later",
+                error = ex.Message,
+                stack = ex.StackTrace
+            });
         }
     }
 }

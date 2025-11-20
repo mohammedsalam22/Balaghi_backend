@@ -73,6 +73,7 @@ builder.Services.AddScoped<IValidator<RegisterRequest>, RegisterRequestValidator
 builder.Services.AddScoped<IValidator<VerifyOtpRequest>, VerifyOtpRequestValidator>();
 builder.Services.AddScoped<InviteEmployeeService>();
 builder.Services.AddScoped<CompleteEmployeeSetupService>();
+builder.Services.AddScoped<DeleteEmployeeService>();
 builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer(options =>
