@@ -7,5 +7,6 @@ namespace Domain.Entities
     {
         public string Name { get; set; } = null!;
          public ICollection<User>? Employees { get; set; } = new List<User>();
+           public ICollection<Complaint> Complaints { get; set; } = new List<Complaint>();
     }
 }

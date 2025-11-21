@@ -11,6 +11,7 @@ namespace Domain.Entities
         public virtual ICollection<OtpCode> OtpCodes { get; init; } = new List<OtpCode>();
           public Guid? GovernmentAgencyId { get; set; }
     public GovernmentAgency? GovernmentAgency { get; set; }
+     public ICollection<Complaint> Complaints { get; set; } = new List<Complaint>();
         public ICollection<PasswordSetupOtp> PasswordSetupOtps { get; set; } = new List<PasswordSetupOtp>();
         private User() { }
         public User(string fullName, string email, string passwordHash)
