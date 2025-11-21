@@ -5,26 +5,27 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Microsoft.Extensions.Configuration; 
+using Microsoft.Extensions.Configuration;
 
 namespace Infrastructure.Persistence
 {
     public static class DbInitializer
     {
         private const string AdminEmail = "admin@system.gov.sa";
-        private const string AdminFullName = "Admin";
+        private const string AdminFullName = "Admin ";
         private const string AdminPassword = "Admin@123456";
 
         private const string TestUserEmail = "user@test.com";
-        private const string TestUserFullName ="User";
+        private const string TestUserFullName = "User";
         private const string TestUserPassword = "User@123456";
-
+        private const string EmployeeEmail = "employee@agency.gov.sa";
+        private const string EmployeeFullName = "Empolyee";
+        private const string EmployeePassword = "Employee@123";
         public static async Task SeedAsync(
             AppDbContext context,
             IPasswordHasher passwordHasher,
             IConfiguration configuration)
         {
-          
             if (!await context.Roles.AnyAsync())
             {
                 var roles = new[]
@@ -36,31 +37,50 @@ namespace Infrastructure.Persistence
 
                 await context.Roles.AddRangeAsync(roles);
                 await context.SaveChangesAsync();
-                Console.WriteLine(": Admin, Employee, User");
+                Console.WriteLine(" Admin, Employee, User");
             }
             if (!await context.Users.AnyAsync(u => u.Email == AdminEmail))
             {
                 var adminRole = await context.Roles.FirstAsync(r => r.Name == "Admin");
-
                 var adminUser = CreateUser(AdminFullName, AdminEmail, AdminPassword, passwordHasher);
                 adminUser.UserRoles.Add(new UserRole { RoleId = adminRole.Id });
 
                 await context.Users.AddAsync(adminUser);
                 await context.SaveChangesAsync();
-
                 PrintUserInfo(adminUser, "Admin", configuration);
             }
             if (!await context.Users.AnyAsync(u => u.Email == TestUserEmail))
             {
                 var userRole = await context.Roles.FirstAsync(r => r.Name == "User");
-
                 var testUser = CreateUser(TestUserFullName, TestUserEmail, TestUserPassword, passwordHasher);
                 testUser.UserRoles.Add(new UserRole { RoleId = userRole.Id });
 
                 await context.Users.AddAsync(testUser);
                 await context.SaveChangesAsync();
-
                 PrintUserInfo(testUser, "User", configuration);
+            }
+            if (!await context.Users.AnyAsync(u => u.Email == EmployeeEmail))
+            {
+                var employeeRole = await context.Roles.FirstAsync(r => r.Name == "Employee");
+                var agency = await context.GovernmentAgencies.FirstOrDefaultAsync()
+                             ?? new GovernmentAgency
+                             {
+                                 Id = Guid.NewGuid(),
+                                 Name = "test",
+                             };
+
+                if (agency.Id == Guid.Empty)
+                {
+                    await context.GovernmentAgencies.AddAsync(agency);
+                    await context.SaveChangesAsync();
+                }
+
+                var employeeUser = CreateUser(EmployeeFullName, EmployeeEmail, EmployeePassword, passwordHasher);
+                employeeUser.UserRoles.Add(new UserRole { RoleId = employeeRole.Id });
+                employeeUser.GovernmentAgencyId = agency.Id;
+                await context.Users.AddAsync(employeeUser);
+                await context.SaveChangesAsync();
+                PrintUserInfo(employeeUser, "Employee", configuration);
             }
         }
 
@@ -77,9 +97,9 @@ namespace Infrastructure.Persistence
         private static void PrintUserInfo(User user, string role, IConfiguration config)
         {
             Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine($"Name       : {user.FullName}");
+            Console.WriteLine($"Name      : {user.FullName}");
             Console.WriteLine($"Email    : {user.Email}");
-            Console.WriteLine($" Password  : {(role == "Admin" ? AdminPassword : TestUserPassword)}");
+            Console.WriteLine($" Password  : {(role == "Admin" ? AdminPassword : role == "User" ? TestUserPassword : EmployeePassword)}");
             Console.WriteLine($"Role       : {role}");
             var token = GenerateJwtToken(user, role, config);
             Console.ForegroundColor = ConsoleColor.Yellow;
@@ -88,9 +108,7 @@ namespace Infrastructure.Persistence
         }
         private static string GenerateJwtToken(User user, string role, IConfiguration config)
         {
-            var key = config["Jwt:Key"] 
-                ?? "your-very-strong-secret-key-must-be-32-chars+!!";
-
+            var key = config["Jwt:Key"] ?? "your-super-secret-key-32-chars-minimum!!";
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
@@ -113,4 +131,5 @@ namespace Infrastructure.Persistence
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
+
 }

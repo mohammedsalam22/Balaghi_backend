@@ -1,4 +1,3 @@
-
 using Domain.Entities;
 public interface IComplaintDao
 {
@@ -6,4 +5,5 @@ public interface IComplaintDao
     Task<Complaint?> GetByTrackingNumberAsync(string trackingNumber, CancellationToken ct = default);
     Task<Complaint?> GetByIdWithDetailsAsync(Guid id, CancellationToken ct = default);
     Task SaveChangesAsync(CancellationToken ct = default);
+    Task<List<Complaint>> GetByAgencyIdAsync(Guid agencyId, CancellationToken ct = default);
 }

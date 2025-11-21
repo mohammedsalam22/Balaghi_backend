@@ -16,7 +16,7 @@ namespace Domain.Entities
         public string ComplaintType { get; private set; } = null!;
         public string Description { get; private set; } = null!;
         public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
-        public ComplaintStatus Status { get; private set; } = ComplaintStatus.Pending;
+        public ComplaintStatus Status { get;  set; } = ComplaintStatus.Pending;
 
         public List<ComplaintAttachment> Attachments { get; private set; } = new();
 
